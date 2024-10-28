@@ -5,9 +5,10 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ParserTest {
-    Parser parser = new Parser();
+    JSONParser parser = new JSONParser();
+
     @Test
     void emptyObject() {
-       assertEquals("{}", parser.getEmptyObject());
+        assertEquals(new JSONObject(), parser.parser("{}"));
     }
 }

@@ -3,5 +3,11 @@ package org.example;
 public enum TokenType {
     LEFT_BRACE,
     RIGHT_BRACE,
-    EOF
+    COLON,
+    STRING,
+    COMMA,
+    NUMBER,
+    BOOLEAN,
+    EOF,
+    INVALID
 }
