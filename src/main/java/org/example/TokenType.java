@@ -1,13 +1,13 @@
 package org.example;
 
 public enum TokenType {
-    LEFT_BRACE,
-    RIGHT_BRACE,
+    BRACE_OPEN,
+    BRACE_CLOSE,
     COLON,
-    STRING,
     COMMA,
-    NUMBER,
+    STRING,
     BOOLEAN,
+    NUMBER,
     EOF,
     INVALID
 }
