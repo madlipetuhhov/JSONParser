@@ -1,8 +1,10 @@
 package org.example;
 
 public enum TokenType {
-    BRACE_OPEN,
-    BRACE_CLOSE,
+    CURLY_BRACE_OPEN,
+    CURLY_BRACE_CLOSE,
+    SQUARE_BRACE_OPEN,
+    SQUARE_BRACE_CLOSE,
     COLON,
     COMMA,
     STRING,

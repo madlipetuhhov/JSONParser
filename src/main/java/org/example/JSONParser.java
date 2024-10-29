@@ -1,27 +1,12 @@
 package org.example;
 
 
-import java.util.Objects;
+import java.util.HashMap;
+
+import static java.util.Collections.emptyMap;
 
 public class JSONParser {
-
     public Object parser(String input) {
-//        vastavalt tokenitele
-        var json = new JSONObject();
-        return json;
+        return emptyMap();
     }
-
-
-//    @Override
-//    public boolean equals(Object obj) {
-//        if (this == obj) return true;
-//        if (!(obj instanceof JSONObject)) return false;
-//        JSONObject other = (JSONObject) obj;
-//        return Objects.equals(properties, other.properties);
-//    }
-//
-//    @Override
-//    public int hashCode() {
-//        return Objects.hash(properties);
-//    }
 }
