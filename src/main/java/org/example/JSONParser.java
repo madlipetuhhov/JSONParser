@@ -4,6 +4,7 @@ package org.example;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -61,15 +62,11 @@ public class JSONParser {
     }
 
     private Object readNull(Reader input) throws IOException {
-        char read = (char) input.read();
-        if (read == 'u') {
-            if (read == 'l') {
-                if (read == 'l') {
-                    return null;
-                }
-            }
+        var buf = new char[3];
+        input.read(buf);
+        if (new String(buf).equals("ull")) {
+            return null;
         }
-
         throw new IllegalArgumentException("Unexpected input");
     }
 
@@ -85,32 +82,23 @@ public class JSONParser {
 
         if ("true".contentEquals(string)) return true;
         if ("false".contentEquals(string)) return false;
-
-//        if (firstLetter == 't') {
-//            if ((char) input.read() == 'r') {
-//                if ((char) input.read() == 'u') {
-//                    if ((char) input.read() == 'e')
-//                        return true;
-//                }
-//            }
-//        }
-//        if (firstLetter == 'f') {
-//            if ((char) input.read() == 'a') {
-//                if ((char) input.read() == 'l') {
-//                    if ((char) input.read() == 's') {
-//                        if ((char) input.read() == 'e')
-//                            return false;
-//                    }
-//                }
-//            }
-//        }
         throw new IllegalArgumentException("Unexpected input");
     }
 
-    private List<Object> readArray(Reader input) {
+    private List<Object> readArray(Reader input) throws IOException {
+        var list = new ArrayList<>();
 
+//        todo: siit edasi
+//        todo vaja kontrollida -1 koikide while(true) puhul
+        while (true) {
+            var c = getChar(input);
+            if (c == ',' || c == '"') continue;
+            if (c == ']') break;
+            list.add(c);
+        }
 
-        return emptyList();
+        return list;
+//        return emptyList();
     }
 
     // todo: miinus nr, boolean, null
@@ -120,7 +108,6 @@ public class JSONParser {
     }
 
     private static char getChar(Reader input) throws IOException {
-        var read = input.read();
-        return (char) read;
+        return (char) input.read(); // '\uFFFF' == -1 (char puhul)
     }
 }
