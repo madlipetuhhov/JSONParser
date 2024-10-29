@@ -1,23 +1,36 @@
 package org.example;
 
-import java.util.HashMap;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class Lexer {
-    String[] createListFromString(String input) {
-        return input.replaceAll("\\s+", "").trim().split("(?<=[{}:])|(?=\\{|}|:|\\s+)");
-    }
 
-    public Map<String, TokenType> tokenize(String[] stringParts) {
+    public Map<String, TokenType> tokenize(String input) {
+        var stringReader = new StringReader(input);
+//        try {
+////            reader(stringReader);
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+
+        String[] splitInput = input.replaceAll("\\s+", "").trim().split("(?<=[{}:])|(?=\\{|}|:|\\s+)");
         var tokens = new LinkedHashMap<String, TokenType>();
 
-        for (String s : stringParts) {
+        for (String s : splitInput) {
             TokenType tokenType = getTokenType(s);
             tokens.put(s, tokenType);
         }
         return tokens;
     }
+
+//    private static void reader(Reader input) throws IOException {
+//        int charReader = input.read();
+//        if (input.read() == '{')
+//
+//    }
 
     private TokenType getTokenType(String s) {
         return switch (s) {
@@ -32,8 +45,27 @@ public class Lexer {
                 if (s.startsWith("\"") && s.endsWith("\"")) {
                     yield TokenType.STRING;
                 }
+//                if (Integer.parseInt(s) Double.parseDouble(s)){
+//                    yield TokenType.NUMBER;
+//                }
                 yield TokenType.INVALID;
             }
         };
     }
+
+
+    public static void main(String[] args) {
+        String inputString = "Hello, World!";
+
+        try (StringReader stringReader = new StringReader(inputString)) {
+            int charRead;
+            while ((charRead = stringReader.read()) != -1) {
+                System.out.print((char) charRead); // Print each character
+            }
+            System.out.println(); // New line after reading
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

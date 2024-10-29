@@ -10,18 +10,18 @@ class JSONParserTest {
 
     @Test
     void emptyObject() {
-        assertEquals(emptyMap(), parser.parser("{}"));
+        assertEquals(emptyMap(), parser.parse("{}"));
     }
 
     @Test
     void string() {
-        assertEquals("hello", parser.parser("""
+        assertEquals("\"hello\"", parser.parse("""
                 "hello"
                 """));
     }
 
     @Test
     void integer() {
-        assertEquals(123, parser.parser("123"));
+        assertEquals(123, parser.parse("123"));
     }
 }
