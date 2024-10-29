@@ -15,9 +15,7 @@ class JSONParserTest {
 
     @Test
     void string() {
-        assertEquals("\"hello\"", parser.parse("""
-                "hello"
-                """));
+        assertEquals("\"hello\"", parser.parse("\"hello\""));
     }
 
     @Test
