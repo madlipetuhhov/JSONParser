@@ -28,6 +28,8 @@ public class JSONParser {
             else if (c == '[') return readArray(input);
             else if (c == '"') return readString(input);
             else if (Character.isDigit(c)) return readNumber(input, c);
+            else if (c == 'n') return readNull(input);
+//            else if (Character.isAlphabetic(c)) return readBoolean(input);
             else throw new IllegalArgumentException("Unexpected character " + c);
         }
         throw new IllegalArgumentException("Unexpected end");
@@ -35,17 +37,11 @@ public class JSONParser {
 
     private String readString(Reader input) throws IOException {
         var string = new StringBuilder();
-        string.append('"');
-
-        boolean isSecondQuote = false;
-        while (!isSecondQuote) {
+        while (true) {
             var read = input.read();
             var c = (char) read;
-
+            if (c == '"') break;
             string.append(c);
-            if (c == '"') {
-                isSecondQuote = true;
-            }
         }
 
         return string.toString();
@@ -58,10 +54,24 @@ public class JSONParser {
         while (true) {
             var read = input.read();
             var c = (char) read;
-            if (!Character.isDigit(c)) break;
+            if (!Character.isDigit(c) && c != '.') break;
             string.append(c);
         }
-        return Integer.parseInt(string.toString());
+        if (string.toString().contains(".")) {
+            return Double.parseDouble(string.toString());
+        } else return Integer.parseInt(string.toString());
+    }
+
+    private Object readNull(Reader input) throws IOException {
+        if ((char) input.read() == 'u') {
+            if ((char) input.read() == 'l') {
+                if ((char) input.read() == 'l') {
+                    return null;
+                }
+            }
+        }
+
+        throw new IllegalArgumentException("Unexpected input");
     }
 
     private List<Object> readArray(Reader input) {
