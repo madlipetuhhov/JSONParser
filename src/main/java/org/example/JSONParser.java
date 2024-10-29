@@ -29,7 +29,7 @@ public class JSONParser {
             else if (c == '"') return readString(input);
             else if (Character.isDigit(c)) return readNumber(input, c);
             else if (c == 'n') return readNull(input);
-//            else if (Character.isAlphabetic(c)) return readBoolean(input);
+            else if (Character.isAlphabetic(c)) return readBoolean(input, c);
             else throw new IllegalArgumentException("Unexpected character " + c);
         }
         throw new IllegalArgumentException("Unexpected end");
@@ -38,8 +38,7 @@ public class JSONParser {
     private String readString(Reader input) throws IOException {
         var string = new StringBuilder();
         while (true) {
-            var read = input.read();
-            var c = (char) read;
+            var c = getChar(input);
             if (c == '"') break;
             string.append(c);
         }
@@ -52,8 +51,7 @@ public class JSONParser {
         string.append(firstNumber);
 
         while (true) {
-            var read = input.read();
-            var c = (char) read;
+            var c = getChar(input);
             if (!Character.isDigit(c) && c != '.') break;
             string.append(c);
         }
@@ -63,9 +61,10 @@ public class JSONParser {
     }
 
     private Object readNull(Reader input) throws IOException {
-        if ((char) input.read() == 'u') {
-            if ((char) input.read() == 'l') {
-                if ((char) input.read() == 'l') {
+        char read = (char) input.read();
+        if (read == 'u') {
+            if (read == 'l') {
+                if (read == 'l') {
                     return null;
                 }
             }
@@ -74,7 +73,43 @@ public class JSONParser {
         throw new IllegalArgumentException("Unexpected input");
     }
 
+    private boolean readBoolean(Reader input, char firstLetter) throws IOException {
+        var string = new StringBuilder();
+        string.append(firstLetter);
+
+        while (true) {
+            var c = getChar(input);
+            if (!Character.isAlphabetic(c)) break;
+            string.append(c);
+        }
+
+        if ("true".contentEquals(string)) return true;
+        if ("false".contentEquals(string)) return false;
+
+//        if (firstLetter == 't') {
+//            if ((char) input.read() == 'r') {
+//                if ((char) input.read() == 'u') {
+//                    if ((char) input.read() == 'e')
+//                        return true;
+//                }
+//            }
+//        }
+//        if (firstLetter == 'f') {
+//            if ((char) input.read() == 'a') {
+//                if ((char) input.read() == 'l') {
+//                    if ((char) input.read() == 's') {
+//                        if ((char) input.read() == 'e')
+//                            return false;
+//                    }
+//                }
+//            }
+//        }
+        throw new IllegalArgumentException("Unexpected input");
+    }
+
     private List<Object> readArray(Reader input) {
+
+
         return emptyList();
     }
 
@@ -82,5 +117,10 @@ public class JSONParser {
     // objektiga viimasena tegeleda
     private Map<String, Object> readObject(Reader input) {
         return emptyMap();
+    }
+
+    private static char getChar(Reader input) throws IOException {
+        var read = input.read();
+        return (char) read;
     }
 }
