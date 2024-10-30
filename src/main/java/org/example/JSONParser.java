@@ -94,7 +94,8 @@ public class JSONParser {
         int countQuotes = 0;
         char c;
         while ((c = (char) input.read()) != '\uFFFF') {
-            if (Character.isWhitespace(c) || c == ',') continue;
+            if (Character.isWhitespace(c)) continue;
+            //if(c == ',') continue;
             if (c == '"') {
                 countQuotes++;
                 if (countQuotes % 2 == 0) {
@@ -102,6 +103,13 @@ public class JSONParser {
                     string = new StringBuilder();
                 }
                 continue;
+            }
+            if(countQuotes == 0){
+                if(c == ',' || c == ']'){
+                    list.add(Integer.parseInt(string.toString()));
+                    string = new StringBuilder();
+                    continue;
+                }
             }
             if (c == ']') break;
             string.append(c);

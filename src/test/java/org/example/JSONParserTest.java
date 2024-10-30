@@ -58,4 +58,10 @@ class JSONParserTest {
         var expected = Arrays.asList("apple", "orange", "cherry");
         assertEquals(expected, parser.parse("[\"apple\", \"orange\", \"cherry\"]"));
     }
+
+    @Test
+    void integerArray() {
+        var expected = Arrays.asList(1, 22, 3);
+        assertEquals(expected, parser.parse("[1, 22, 3]"));
+    }
 }
