@@ -129,19 +129,29 @@ class JSONParserTest {
     }
 
     @Test
-    void unexpectedCharacterException() {
-        Assertions.assertThrows(IllegalArgumentException.class,
-                () -> parser.parse("$"),
-                "Unexpected character ");
+    void multipleObjects() {
+        var expected = new LinkedHashMap<String, Object>();
+        expected.put("key1", true);
+        expected.put("key2", false);
+        expected.put("key3", null);
+        expected.put("key4", "apple");
+        expected.put("key5", 101);
+        assertEquals(expected, parser.parse("""
+                {
+                  "key1": true,
+                  "key2": false,
+                  "key3": null,
+                  "key4": "value",
+                  "key5": 101
+                }"""));
     }
-    //todo:  object inside of an object
-    // todo: different types inside of an object
 
 //    @Test
-//    void arrayObject() {
-//        var expected = new LinkedHashMap<String, Object>();
-//        expected.put("key", Arrays.asList("apple", "orange", "cherry"));
-//        assertEquals(expected, parser.parse("{\"key\": [\"apple\", \"orange\", \"cherry\"]}"));
+//    void unexpectedCharacterException() {
+//        Assertions.assertThrows(IllegalArgumentException.class,
+//                () -> parser.parse("$"),
+//                "Unexpected character ");
 //    }
-
+    //todo:  object inside of an object
+    // todo: different types inside of an object
 }

@@ -24,13 +24,12 @@ public class JSONParser {
     }
 
     public Object parse(Reader input) throws IOException {
-        var read = input.read();
-        c = (char) read;
-        while (read != -1) {
-            if (Character.isWhitespace(c)) return parse(input);
-            else if (c == ':' || c == ',') return parse(input);
+        while ((c = (char) input.read()) != '\uFFFF') {
+            if (Character.isWhitespace(c)) continue;
+            //else if (c == ':' || c == ',') return parse(input);
             else if (c == '{') return readObject(input);
             else if (c == '[') return readArray(input);
+//            else if (c == ']') ;
             else if (c == '"') return readString(input);
             else if (Character.isDigit(c) || c == '-') return readNumber(input, c);
             else if (c == 'n') return readNull(input);
@@ -43,8 +42,11 @@ public class JSONParser {
     private String readString(Reader input) throws IOException {
         var string = new StringBuilder();
         while ((c = (char) input.read()) != '\uFFFF') {
-            if (c == '"' && string.isEmpty()) continue;
-            else if (c == '"') break;
+            if (c == '"' && string.isEmpty() || c == '\n' || Character.isWhitespace(c)) continue;
+            else if (c == '"'){
+                c = (char)input.read();
+                break;
+            }
             string.append(c);
         }
         return string.toString();
@@ -90,7 +92,6 @@ public class JSONParser {
         throw new IllegalArgumentException("Unexpected input");
     }
 
-    //    todo: kas booleanid aitavad if lausete sees, kuidas ilusamaks teha
     // kuidas tegeleda valede exceptionitega
 
     //todo: teha rekursiivseks
@@ -99,6 +100,9 @@ public class JSONParser {
 
         while (c != ']') {
             list.add(parse(input));
+            if(c == ','){
+                continue;
+            }
         }
         return list;
     }
@@ -108,11 +112,11 @@ public class JSONParser {
 //        return list;
 //        throw new IllegalArgumentException("Unexpected input");
 
-
-    // todo: objektiga viimasena tegeleda
     private Map<String, Object> readObject(Reader input) throws IOException {
         var map = new LinkedHashMap<String, Object>();
-        map.put(readString(input), parse(input));
+        while(c == '\uFFFF'){
+            map.put(readString(input), parse(input));
+        }
         return map;
 //        return emptyMap();
     }
