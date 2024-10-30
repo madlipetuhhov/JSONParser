@@ -1,5 +1,6 @@
 package org.example;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -125,6 +126,13 @@ class JSONParserTest {
         var expected = new LinkedHashMap<String, Object>();
         expected.put("key", Arrays.asList("apple", "orange", "cherry"));
         assertEquals(expected, parser.parse("{\"key\": [\"apple\", \"orange\", \"cherry\"]}"));
+    }
+
+    @Test
+    void unexpectedCharacterException() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> parser.parse("$"),
+                "Unexpected character ");
     }
     //todo:  object inside of an object
     // todo: different types inside of an object
