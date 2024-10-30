@@ -37,8 +37,8 @@ public class JSONParser {
 
     private String readString(Reader input) throws IOException {
         var string = new StringBuilder();
-        while (true) {
-            var c = (char) input.read();
+        char c;
+        while ((c = (char) input.read()) != '\uFFFF') {
             if (c == '"') break;
             string.append(c);
         }
@@ -50,9 +50,9 @@ public class JSONParser {
     private Number readNumber(Reader input, char firstNumber) throws IOException {
         var string = new StringBuilder();
         string.append(firstNumber);
+        char c;
+        while ((c = (char) input.read()) != '\uFFFF') {
 
-        while (true) {
-            var c = (char) input.read();
             if (!Character.isDigit(c) && c != '.') break;
             string.append(c);
         }
@@ -62,7 +62,6 @@ public class JSONParser {
     }
 
     private Object readNull(Reader input) throws IOException {
-//        todo: raakida mitme char korraga kontrollist
         var buf = new char[3];
         input.read(buf);
         if (new String(buf).equals("ull")) {
@@ -79,7 +78,6 @@ public class JSONParser {
                 return true;
             }
         }
-
         if (firstLetter == 'f') {
             var buf = new char[4];
             input.read(buf);
@@ -87,28 +85,33 @@ public class JSONParser {
                 return false;
             }
         }
-
         throw new IllegalArgumentException("Unexpected input");
     }
 
     private List<Object> readArray(Reader input) throws IOException {
         var list = new ArrayList<>();
-
-//        todo: siit edasi, ei toota
-//        todo: vaja kontrollida -1 koikide while(true) puhul
-//       todo: vorrelda '\uFFFF' == -1 (char puhul)
-        while (true) {
-            var c = (char) input.read(); //
-            if (c == ',' || c == '"') continue;
+        var string = new StringBuilder();
+        int countQuotes = 0;
+        char c;
+        while ((c = (char) input.read()) != '\uFFFF') {
+            if (Character.isWhitespace(c) || c == ',') continue;
+            if (c == '"') {
+                countQuotes++;
+                if (countQuotes % 2 == 0) {
+                    list.add(string.toString());
+                    string = new StringBuilder();
+                }
+                continue;
+            }
             if (c == ']') break;
-            list.add(c);
+            string.append(c);
         }
-
         return list;
-//        return emptyList();
+//        else return emptyList();
+//        throw new IllegalArgumentException("Unexpected input");
     }
 
-    // objektiga viimasena tegeleda
+    // todo: objektiga viimasena tegeleda
     private Map<String, Object> readObject(Reader input) {
         return emptyMap();
     }

@@ -12,6 +12,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 class JSONParserTest {
     JSONParser parser = new JSONParser();
 
+//    @Test
+//    void empty() {
+//        assertEquals(new IllegalArgumentException("Unexpected end"), parser.parse(""));
+//    }
+
     @Test
     void emptyObject() {
         assertEquals(emptyMap(), parser.parse("{}"));
@@ -47,10 +52,10 @@ class JSONParserTest {
     void emptyArray() {
         assertEquals(emptyList(), parser.parse("[]"));
     }
-//
-//    @Test
-//    void stringArray() {
-//        var expected = Arrays.asList("apple", "orange", "cherry");
-//        assertEquals(expected, parser.parse("[\"apple\", \"orange\", \"cherry\"]"));
-//    }
+
+    @Test
+    void stringArray() {
+        var expected = Arrays.asList("apple", "orange", "cherry");
+        assertEquals(expected, parser.parse("[\"apple\", \"orange\", \"cherry\"]"));
+    }
 }
