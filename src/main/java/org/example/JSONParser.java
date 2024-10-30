@@ -5,9 +5,11 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 
 public class JSONParser {
@@ -23,11 +25,12 @@ public class JSONParser {
         var read = input.read();
         var c = (char) read;
         while (read != -1) {
-            if (Character.isWhitespace(c)) continue;
+            if (Character.isWhitespace(c)) return parse(input);
+            else if (c == ':') return parse(input);
             else if (c == '{') return readObject(input);
             else if (c == '[') return readArray(input);
             else if (c == '"') return readString(input);
-            else if (Character.isDigit(c)) return readNumber(input, c);
+            else if (Character.isDigit(c) || c == '-') return readNumber(input, c);
             else if (c == 'n') return readNull(input);
             else if (Character.isAlphabetic(c)) return readBoolean(input, c);
             else throw new IllegalArgumentException("Unexpected character " + c);
@@ -38,22 +41,22 @@ public class JSONParser {
     private String readString(Reader input) throws IOException {
         var string = new StringBuilder();
         char c;
+//        topelt jutumark
         while ((c = (char) input.read()) != '\uFFFF') {
-            if (c == '"') break;
+            if (c == '"' && string.isEmpty()) continue;
+            else if (c == '"') break;
             string.append(c);
         }
-
         return string.toString();
     }
 
-    // todo: miinus nr
     private Number readNumber(Reader input, char firstNumber) throws IOException {
         var string = new StringBuilder();
         string.append(firstNumber);
         char c;
         while ((c = (char) input.read()) != '\uFFFF') {
 
-            if (!Character.isDigit(c) && c != '.') break;
+            if (!Character.isDigit(c) && c != '.' && c != '-') break;
             string.append(c);
         }
         if (string.toString().contains(".")) {
@@ -88,14 +91,20 @@ public class JSONParser {
         throw new IllegalArgumentException("Unexpected input");
     }
 
+    //    todo: kas booleanid aitavad if lausete sees, kuidas ilusamaks teha
+    // kuidas tegeleda valede exceptionitega
     private List<Object> readArray(Reader input) throws IOException {
         var list = new ArrayList<>();
         var string = new StringBuilder();
         int countQuotes = 0;
+//        boolean isNumber = countQuotes == 0;
         char c;
+
         while ((c = (char) input.read()) != '\uFFFF') {
             if (Character.isWhitespace(c)) continue;
-            //if(c == ',') continue;
+            if (c == ',' && countQuotes > 0) continue;
+//            boolean isString = c == '"';
+
             if (c == '"') {
                 countQuotes++;
                 if (countQuotes % 2 == 0) {
@@ -104,9 +113,14 @@ public class JSONParser {
                 }
                 continue;
             }
-            if(countQuotes == 0){
-                if(c == ',' || c == ']'){
-                    list.add(Integer.parseInt(string.toString()));
+
+            if (countQuotes == 0) {
+                if (c == ',' || (c == ']' && !list.isEmpty())) {
+                    if (string.toString().contains(".")) {
+                        list.add(Double.parseDouble(string.toString()));
+                    } else {
+                        list.add(Integer.parseInt(string.toString()));
+                    }
                     string = new StringBuilder();
                     continue;
                 }
@@ -114,13 +128,18 @@ public class JSONParser {
             if (c == ']') break;
             string.append(c);
         }
+        if (list.isEmpty()) {
+            return emptyList();
+        }
         return list;
-//        else return emptyList();
 //        throw new IllegalArgumentException("Unexpected input");
     }
 
     // todo: objektiga viimasena tegeleda
-    private Map<String, Object> readObject(Reader input) {
-        return emptyMap();
+    private Map<String, Object> readObject(Reader input) throws IOException {
+        var map = new LinkedHashMap<String, Object>();
+        map.put(readString(input), parse(input));
+        return map;
+//        return emptyMap();
     }
 }
