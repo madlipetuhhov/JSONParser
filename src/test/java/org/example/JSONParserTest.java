@@ -22,7 +22,8 @@ class JSONParserTest {
 
     @Test
     void string() {
-        assertEquals("hello", parser.parse("\"hello\""));
+      assertEquals("hello, Mari & Toomas", parser.parse("\"hello, Mari & Toomas\""));
+      //  assertEquals("jah", parser.parse("\"jah"));
     }
 
     @Test
@@ -51,7 +52,8 @@ class JSONParserTest {
         assertEquals(true, parser.parse("true"));
         assertEquals(false, parser.parse("false"));
     }
-// todo: ] jouab parse meetodisse ja unexpected character
+
+    // todo: ] jouab parse meetodisse ja unexpected character
     @Test
     void emptyArray() {
         assertEquals(emptyList(), parser.parse("[]"));
@@ -81,7 +83,7 @@ class JSONParserTest {
         assertEquals(expected, parser.parse("[1.2, 22.2, 3.33]"));
     }
 
-//    todo: } jouab readStringi
+    //    todo: } jouab readStringi
     @Test
     void emptyObject() {
         assertEquals(emptyMap(), parser.parse("{}"));
@@ -160,14 +162,14 @@ class JSONParserTest {
         expected.put("key1", true);
         expected.put("key2", false);
         expected.put("key3", null);
-        expected.put("key4", "apple");
+        expected.put("key4", "apple pie");
         expected.put("key5", 101);
         assertEquals(expected, parser.parse("""
                 {
                   "key1": true,
                   "key2": false,
                   "key3": null,
-                  "key4": "apple",
+                  "key4": "apple pie",
                   "key5": 101
                 }"""));
     }

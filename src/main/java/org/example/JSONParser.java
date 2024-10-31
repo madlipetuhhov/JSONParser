@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
 
 public class JSONParser {
     private char c;
@@ -31,7 +30,7 @@ public class JSONParser {
                 //else if (c == ':' || c == ',') return parse(input);
             else if (c == '{') return readObject(input);
             else if (c == '[') return readArray(input);
-            else if (c == '"') return readString(input);
+            else if (isQuote()) return readString(input);
             else if (Character.isDigit(c) || c == '-') return readNumber(input, c);
             else if (c == 'n') return readNull(input);
             else if (Character.isAlphabetic(c)) return readBoolean(input, c);
@@ -43,14 +42,22 @@ public class JSONParser {
     private String readString(Reader input) throws IOException {
         var string = new StringBuilder();
         while ((c = (char) input.read()) != Character.MAX_VALUE) {
-            if (c == '"' && string.isEmpty() || c == '\n' || Character.isWhitespace(c)) continue;
-            else if (c == '"') {
-                c = (char) input.read();
-                break;
+            if (Character.isWhitespace(c) && string.isEmpty()) continue;
+            boolean isFirstQuoteInObjectKey = isQuote() && string.isEmpty();
+            if (isFirstQuoteInObjectKey || c == '\n') continue;
+            else {
+                if (isQuote()) {
+                    c = (char) input.read();
+                    return string.toString();
+                }
             }
             string.append(c);
         }
-        return string.toString();
+        throw new IllegalArgumentException("Invalid end of string");
+    }
+
+    private boolean isQuote() {
+        return c == '"';
     }
 
     private Number readNumber(Reader input, char firstNumber) throws IOException {
