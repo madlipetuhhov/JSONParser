@@ -13,6 +13,7 @@ import static java.lang.Character.isDigit;
 import static java.lang.Character.isWhitespace;
 import static java.lang.Double.parseDouble;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 
 public class JSONParser {
     public static final char END_OF_OBJECT = '}';
@@ -27,8 +28,6 @@ public class JSONParser {
     public static final char DOT = '.';
     private char c;
 
-    // TODO methods to constants
-
     public Object parse(String input) {
         try {
             return parse(new StringReader(input));
@@ -37,10 +36,25 @@ public class JSONParser {
         }
     }
 
+//    todo: close reader
+    /*
+The try-with-resources statement ensures that the StringReader is closed automatically
+after the block is executed, even if an exception occurs. This is important for resource
+management and avoiding memory leaks.
+*/
+//    public static Object parse(String input) {
+//        try (var reader = new StringReader(input)) {
+//            return new JsonParser(reader).parse();
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
+
     public Object parse(Reader input) throws IOException {
-        while (nextChar(input) != END_OF_INPUT) {
+        while (getNextChar(input) != END_OF_INPUT) {
             if (isWhitespace(c)) continue;
             else if (c == END_OF_ARRAY) return emptyList();
+            else if (c == END_OF_OBJECT) return emptyMap();
             else if (c == START_OF_OBJECT) return readObject(input);
             else if (c == START_OF_ARRAY) return readArray(input);
             else if (c == QUOTE) return readString(input);
@@ -54,13 +68,13 @@ public class JSONParser {
 
     private String readString(Reader input) throws IOException {
         var string = new StringBuilder();
-        while (nextChar(input) != END_OF_INPUT) {
+        while (getNextChar(input) != END_OF_INPUT) {
             if (isWhitespace(c) && string.isEmpty()) continue;
             boolean isFirstQuoteInObjectKey = c == QUOTE && string.isEmpty();
             if (isFirstQuoteInObjectKey || c == NEXT_LINE) continue;
             else {
                 if (c == QUOTE) {
-                    nextChar(input);
+                    getNextChar(input);
                     return string.toString();
                 }
             }
@@ -72,7 +86,7 @@ public class JSONParser {
     private Number readNumber(Reader input, char firstNumber) throws IOException {
         var string = new StringBuilder();
         string.append(firstNumber);
-        while (nextChar(input) != END_OF_INPUT) {
+        while (getNextChar(input) != END_OF_INPUT) {
             if (c == NEXT_LINE) continue;
             if (c == COMMA || c == END_OF_ARRAY || c == END_OF_OBJECT) break;
             if (!isDigit(c) && c != DOT && c != MINUS) throw new IllegalArgumentException("Not a number");
@@ -110,21 +124,23 @@ public class JSONParser {
             if (c == COMMA) continue;
         }
         if (c == END_OF_ARRAY && c == END_OF_INPUT) throw new IllegalArgumentException("Invalid end of array");
-        nextChar(input);
+        getNextChar(input);
         return list;
     }
 
     private Map<String, Object> readObject(Reader input) throws IOException {
         var map = new LinkedHashMap<String, Object>();
         while (c == COMMA || map.isEmpty()) {
+            getNextChar(input);
+            if (c == END_OF_OBJECT) return emptyMap();
             map.put(readString(input), parse(input));
         }
-        nextChar(input);
+//        if (c == END_OF_OBJECT && c == END_OF_INPUT) throw new IllegalArgumentException("Invalid end of object");
+        getNextChar(input);
         return map;
-//      TODO  return emptyMap();
     }
 
-    private char nextChar(Reader input) throws IOException {
+    private char getNextChar(Reader input) throws IOException {
         return c = (char) input.read();
     }
 
@@ -132,7 +148,7 @@ public class JSONParser {
         var buf = new char[numOfChars];
         input.read(buf);
         if (new String(buf).equals(equals)) {
-            nextChar(input);
+            getNextChar(input);
             return true;
         }
         return false;

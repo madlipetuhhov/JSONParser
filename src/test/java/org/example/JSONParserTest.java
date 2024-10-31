@@ -76,7 +76,6 @@ class JSONParserTest {
         assertEquals(expected, parser.parse("[1.2, 22.2, 3.33]"));
     }
 
-    //    todo: } jouab readStringi
     @Test
     void emptyObject() {
         assertEquals(emptyMap(), parser.parse("{}"));
@@ -216,10 +215,18 @@ class JSONParserTest {
                 () -> parser.parse("fal"),
                 "Not a boolean");
     }
+
     @Test
     void invalidEndOfArrayException() {
         assertThrows(IllegalArgumentException.class,
                 () -> parser.parse("[1, 22, 3"),
                 "Invalid end of array");
+    }
+
+    @Test
+    void invalidEndOfObjectException() {
+        assertThrows(IllegalArgumentException.class,
+                () -> parser.parse("{\"key\": true"),
+                "Invalid end of object");
     }
 }
