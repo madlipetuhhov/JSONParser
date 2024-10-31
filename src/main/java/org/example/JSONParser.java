@@ -23,7 +23,7 @@ public class JSONParser {
     }
 
     public Object parse(Reader input) throws IOException {
-        while ((c = (char) input.read()) != Character.MAX_VALUE) {
+        while (nextChar(input) != endOfStringReader()) {
             if (Character.isWhitespace(c)) continue;
 //            todo: edasi emptyListiga
             else if (c == ']') return emptyList();
@@ -41,13 +41,13 @@ public class JSONParser {
 
     private String readString(Reader input) throws IOException {
         var string = new StringBuilder();
-        while ((c = (char) input.read()) != Character.MAX_VALUE) {
+        while (nextChar(input) != endOfStringReader()) {
             if (Character.isWhitespace(c) && string.isEmpty()) continue;
             boolean isFirstQuoteInObjectKey = isQuote() && string.isEmpty();
             if (isFirstQuoteInObjectKey || c == '\n') continue;
             else {
                 if (isQuote()) {
-                    c = (char) input.read();
+                    nextChar(input);
                     return string.toString();
                 }
             }
@@ -56,14 +56,10 @@ public class JSONParser {
         throw new IllegalArgumentException("Invalid end of string");
     }
 
-    private boolean isQuote() {
-        return c == '"';
-    }
-
     private Number readNumber(Reader input, char firstNumber) throws IOException {
         var string = new StringBuilder();
         string.append(firstNumber);
-        while ((c = (char) input.read()) != Character.MAX_VALUE) {
+        while (nextChar(input) != endOfStringReader()) {
             if (!Character.isDigit(c) && c != '.' && c != '-') break;
             string.append(c);
         }
@@ -76,7 +72,7 @@ public class JSONParser {
         var buf = new char[3];
         input.read(buf);
         if (new String(buf).equals("ull")) {
-            c = (char) input.read();
+            nextChar(input);
             return null;
         }
         throw new IllegalArgumentException("Unexpected input");
@@ -87,7 +83,7 @@ public class JSONParser {
             var buf = new char[3];
             input.read(buf);
             if (new String(buf).equals("rue")) {
-                c = (char) input.read();
+                nextChar(input);
                 return true;
             }
         }
@@ -95,7 +91,7 @@ public class JSONParser {
             var buf = new char[4];
             input.read(buf);
             if (new String(buf).equals("alse")) {
-                c = (char) input.read();
+                nextChar(input);
                 return false;
             }
         }
@@ -110,9 +106,9 @@ public class JSONParser {
                 break;
             } else list.add(parser);
 
-            if (c == ',') continue;
+            if (isComma()) continue;
         }
-        c = (char) input.read();
+        nextChar(input);
         return list;
 //        throw new IllegalArgumentException("Unexpected input");
     }
@@ -120,12 +116,28 @@ public class JSONParser {
     private Map<String, Object> readObject(Reader input) throws IOException {
         var map = new LinkedHashMap<String, Object>();
 
-        while (c == ',' || map.isEmpty()) {
+        while (isComma() || map.isEmpty()) {
             map.put(readString(input), parse(input));
         }
 
-        c = (char) input.read();
+        nextChar(input);
         return map;
 //        return emptyMap();
+    }
+
+    private boolean isQuote() {
+        return c == '"';
+    }
+
+    private boolean isComma() {
+        return c == ',';
+    }
+
+    private static char endOfStringReader() {
+        return Character.MAX_VALUE;
+    }
+
+    private char nextChar(Reader input) throws IOException {
+        return c = (char) input.read();
     }
 }
