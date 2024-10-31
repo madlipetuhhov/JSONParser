@@ -9,10 +9,25 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.lang.Character.isDigit;
+import static java.lang.Character.isWhitespace;
+import static java.lang.Double.parseDouble;
 import static java.util.Collections.emptyList;
 
 public class JSONParser {
+    public static final char END_OF_OBJECT = '}';
+    private static final char END_OF_INPUT = Character.MAX_VALUE;
+    public static final char NEXT_LINE = '\n';
+    public static final char END_OF_ARRAY = ']';
+    public static final char COMMA = ',';
+    public static final char QUOTE = '"';
+    public static final char START_OF_OBJECT = '{';
+    public static final char START_OF_ARRAY = '[';
+    public static final char MINUS = '-';
+    public static final char DOT = '.';
     private char c;
+
+    // TODO methods to constants
 
     public Object parse(String input) {
         try {
@@ -23,13 +38,13 @@ public class JSONParser {
     }
 
     public Object parse(Reader input) throws IOException {
-        while (nextChar(input) != endOfStringReader()) {
-            if (Character.isWhitespace(c)) continue;
-            else if (isEndOfArray()) return emptyList();
-            else if (c == '{') return readObject(input);
-            else if (c == '[') return readArray(input);
-            else if (isQuote()) return readString(input);
-            else if (Character.isDigit(c) || c == '-') return readNumber(input, c);
+        while (nextChar(input) != END_OF_INPUT) {
+            if (isWhitespace(c)) continue;
+            else if (c == END_OF_ARRAY) return emptyList();
+            else if (c == START_OF_OBJECT) return readObject(input);
+            else if (c == START_OF_ARRAY) return readArray(input);
+            else if (c == QUOTE) return readString(input);
+            else if (isDigit(c) || c == MINUS) return readNumber(input, c);
             else if (c == 'n') return readNull(input);
             else if (Character.isAlphabetic(c)) return readBoolean(input, c);
             else throw new IllegalArgumentException("Unexpected character " + c);
@@ -39,12 +54,12 @@ public class JSONParser {
 
     private String readString(Reader input) throws IOException {
         var string = new StringBuilder();
-        while (nextChar(input) != endOfStringReader()) {
-            if (Character.isWhitespace(c) && string.isEmpty()) continue;
-            boolean isFirstQuoteInObjectKey = isQuote() && string.isEmpty();
-            if (isFirstQuoteInObjectKey || isNextLine()) continue;
+        while (nextChar(input) != END_OF_INPUT) {
+            if (isWhitespace(c) && string.isEmpty()) continue;
+            boolean isFirstQuoteInObjectKey = c == QUOTE && string.isEmpty();
+            if (isFirstQuoteInObjectKey || c == NEXT_LINE) continue;
             else {
-                if (isQuote()) {
+                if (c == QUOTE) {
                     nextChar(input);
                     return string.toString();
                 }
@@ -57,96 +72,69 @@ public class JSONParser {
     private Number readNumber(Reader input, char firstNumber) throws IOException {
         var string = new StringBuilder();
         string.append(firstNumber);
-        while (nextChar(input) != endOfStringReader()) {
-            if (isNextLine()) continue;
-            if (isComma() || isEndOfArray() || isEndOfObject()) break;
-            if (!Character.isDigit(c) && c != '.' && c != '-') throw new IllegalArgumentException("Not number");
+        while (nextChar(input) != END_OF_INPUT) {
+            if (c == NEXT_LINE) continue;
+            if (c == COMMA || c == END_OF_ARRAY || c == END_OF_OBJECT) break;
+            if (!isDigit(c) && c != DOT && c != MINUS) throw new IllegalArgumentException("Not a number");
             string.append(c);
         }
         if (string.toString().contains(".")) {
-            return Double.parseDouble(string.toString());
-        } else return Integer.parseInt(string.toString());
+            return parseDouble(string.toString());
+        } else {
+            return Integer.parseInt(string.toString());
+        }
     }
 
     private Object readNull(Reader input) throws IOException {
-        var buf = new char[3];
-        input.read(buf);
-        if (new String(buf).equals("ull")) {
-            nextChar(input);
-            return null;
-        }
-        throw new IllegalArgumentException("Unexpected input");
+        if (isEqualTo(input, 3, "ull")) return null;
+        throw new IllegalArgumentException("Not a null");
     }
 
     private boolean readBoolean(Reader input, char firstLetter) throws IOException {
         if (firstLetter == 't') {
-            var buf = new char[3];
-            input.read(buf);
-            if (new String(buf).equals("rue")) {
-                nextChar(input);
-                return true;
-            }
+            if (isEqualTo(input, 3, "rue")) return true;
         }
         if (firstLetter == 'f') {
-            var buf = new char[4];
-            input.read(buf);
-            if (new String(buf).equals("alse")) {
-                nextChar(input);
-                return false;
-            }
+            if (isEqualTo(input, 4, "alse")) return false;
         }
-        throw new IllegalArgumentException("Unexpected input");
+        throw new IllegalArgumentException("Not a boolean");
     }
 
     private List<Object> readArray(Reader input) throws IOException {
         var list = new ArrayList<>();
-        while (c != ']') {
+        while (c != END_OF_ARRAY) {
             var parser = parse(input);
             if (parser == emptyList()) {
                 break;
             } else list.add(parser);
-            if (isComma()) continue;
+            if (c == COMMA) continue;
         }
+        if (c == END_OF_ARRAY && c == END_OF_INPUT) throw new IllegalArgumentException("Invalid end of array");
         nextChar(input);
         return list;
-//        throw new IllegalArgumentException("Unexpected input");
     }
 
     private Map<String, Object> readObject(Reader input) throws IOException {
         var map = new LinkedHashMap<String, Object>();
-        while (isComma() || map.isEmpty()) {
+        while (c == COMMA || map.isEmpty()) {
             map.put(readString(input), parse(input));
         }
         nextChar(input);
         return map;
-//        return emptyMap();
-    }
-
-    private boolean isQuote() {
-        return c == '"';
-    }
-
-    private boolean isComma() {
-        return c == ',';
-    }
-
-    private boolean isEndOfArray() {
-        return c == ']';
-    }
-
-    private boolean isEndOfObject() {
-        return c == '}';
-    }
-
-    private boolean isNextLine() {
-        return c == '\n';
-    }
-
-    private static char endOfStringReader() {
-        return Character.MAX_VALUE;
+//      TODO  return emptyMap();
     }
 
     private char nextChar(Reader input) throws IOException {
         return c = (char) input.read();
+    }
+
+    private boolean isEqualTo(Reader input, int numOfChars, String equals) throws IOException {
+        var buf = new char[numOfChars];
+        input.read(buf);
+        if (new String(buf).equals(equals)) {
+            nextChar(input);
+            return true;
+        }
+        return false;
     }
 }

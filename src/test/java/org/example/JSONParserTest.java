@@ -9,21 +9,14 @@ import java.util.Map;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 class JSONParserTest {
     JSONParser parser = new JSONParser();
 
-//    @Test
-//    void empty() {
-//        assertEquals(new IllegalArgumentException("Unexpected end"), parser.parse(""));
-//    }
-
     @Test
     void string() {
         assertEquals("hello, Mari & Toomas", parser.parse("\"hello, Mari & Toomas\""));
-        //  assertEquals("jah", parser.parse("\"jah"));
     }
 
     @Test
@@ -133,6 +126,7 @@ class JSONParserTest {
 
     @Test
     void multipleNestedObjects() {
+//        todo: kui jouab, teha map.of()
         var expected = new LinkedHashMap<String, Object>();
         var key11 = new LinkedHashMap<String, Object>();
         var key22 = new LinkedHashMap<String, Object>();
@@ -145,7 +139,7 @@ class JSONParserTest {
         expected.put("key3", null);
         expected.put("key4", "apple");
         expected.put("key5", 101);
-        assertEquals(expected, parser.parse("""
+        assertEquals(expected, parser.parse(/* language=json */ """
                 {
                   "key1": {"key11": {"key33": false}},
                   "key2": {"key22": [1.2, 22.2, 3.33]},
@@ -157,13 +151,14 @@ class JSONParserTest {
 
     @Test
     void multipleObjects() {
-        var expected = new LinkedHashMap<String, Object>();
-        expected.put("key1", true);
-        expected.put("key2", false);
-        expected.put("key3", null);
-        expected.put("key4", "apple pie");
-        expected.put("key5", 101);
-        assertEquals(expected, parser.parse("""
+        var expected = new LinkedHashMap<String, Object>() {{
+            put("key1", true);
+            put("key2", false);
+            put("key3", null);
+            put("key4", "apple pie");
+            put("key5", 101);
+        }};
+        assertEquals(expected, parser.parse(/* language=json */ """
                 {
                   "key1": true,
                   "key2": false,
@@ -173,12 +168,58 @@ class JSONParserTest {
                 }"""));
     }
 
-//    @Test
-//    void unexpectedCharacterException() {
-//        Assertions.assertThrows(IllegalArgumentException.class,
-//                () -> parser.parse("$"),
-//                "Unexpected character ");
-//    }
-    //todo:  object inside of an object
-    // todo: different types inside of an object
+    @Test
+    void unexpectedCharacterException() {
+        assertThrows(IllegalArgumentException.class,
+                () -> parser.parse("$"),
+                "Unexpected character ");
+    }
+
+    @Test
+    void unexpectedEndException() {
+        assertThrows(IllegalArgumentException.class,
+                () -> parser.parse(""),
+                "Unexpected end");
+    }
+
+    @Test
+    void invalidEndOfStringException() {
+        assertThrows(IllegalArgumentException.class,
+                () -> parser.parse("\"jah"),
+                "Invalid end of string");
+    }
+
+    @Test
+    void notANumberException() {
+        assertThrows(IllegalArgumentException.class,
+                () -> parser.parse("8$"),
+                "Not a number");
+    }
+
+    @Test
+    void notNullException() {
+        assertThrows(IllegalArgumentException.class,
+                () -> parser.parse("nuul"),
+                "Not a null");
+    }
+
+    @Test
+    void notTrueException() {
+        assertThrows(IllegalArgumentException.class,
+                () -> parser.parse("rue"),
+                "Not a boolean");
+    }
+
+    @Test
+    void notFalseException() {
+        assertThrows(IllegalArgumentException.class,
+                () -> parser.parse("fal"),
+                "Not a boolean");
+    }
+    @Test
+    void invalidEndOfArrayException() {
+        assertThrows(IllegalArgumentException.class,
+                () -> parser.parse("[1, 22, 3"),
+                "Invalid end of array");
+    }
 }
