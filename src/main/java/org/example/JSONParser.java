@@ -24,8 +24,9 @@ public class JSONParser {
     }
 
     public Object parse(Reader input) throws IOException {
-        while ((c = (char) input.read()) != '\uFFFF') {
+        while ((c = (char) input.read()) != Character.MAX_VALUE) {
             if (Character.isWhitespace(c)) continue;
+//            todo: edasi emptyListiga
             else if (c == ']') return emptyList();
                 //else if (c == ':' || c == ',') return parse(input);
             else if (c == '{') return readObject(input);
@@ -41,7 +42,7 @@ public class JSONParser {
 
     private String readString(Reader input) throws IOException {
         var string = new StringBuilder();
-        while ((c = (char) input.read()) != '\uFFFF') {
+        while ((c = (char) input.read()) != Character.MAX_VALUE) {
             if (c == '"' && string.isEmpty() || c == '\n' || Character.isWhitespace(c)) continue;
             else if (c == '"') {
                 c = (char) input.read();
@@ -55,7 +56,7 @@ public class JSONParser {
     private Number readNumber(Reader input, char firstNumber) throws IOException {
         var string = new StringBuilder();
         string.append(firstNumber);
-        while ((c = (char) input.read()) != '\uFFFF') {
+        while ((c = (char) input.read()) != Character.MAX_VALUE) {
             if (!Character.isDigit(c) && c != '.' && c != '-') break;
             string.append(c);
         }
@@ -111,9 +112,11 @@ public class JSONParser {
 
     private Map<String, Object> readObject(Reader input) throws IOException {
         var map = new LinkedHashMap<String, Object>();
+
         while (c == ',' || map.isEmpty()) {
             map.put(readString(input), parse(input));
         }
+
         c = (char) input.read();
         return map;
 //        return emptyMap();

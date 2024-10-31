@@ -82,10 +82,10 @@ class JSONParserTest {
     }
 
 //    todo: } jouab readStringi
-//    @Test
-//    void emptyObject() {
-//        assertEquals(emptyMap(), parser.parse("{}"));
-//    }
+    @Test
+    void emptyObject() {
+        assertEquals(emptyMap(), parser.parse("{}"));
+    }
 
     @Test
     void stringObject() {
