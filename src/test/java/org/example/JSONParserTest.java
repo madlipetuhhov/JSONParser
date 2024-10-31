@@ -52,10 +52,10 @@ class JSONParserTest {
         assertEquals(false, parser.parse("false"));
     }
 // todo: ] jouab parse meetodisse ja unexpected character
-//    @Test
-//    void emptyArray() {
-//        assertEquals(emptyList(), parser.parse("[]"));
-//    }
+    @Test
+    void emptyArray() {
+        assertEquals(emptyList(), parser.parse("[]"));
+    }
 
     @Test
     void stringArray() {
@@ -127,6 +127,31 @@ class JSONParserTest {
         var expected = new LinkedHashMap<String, Object>();
         expected.put("key", Arrays.asList("apple", "orange", "cherry"));
         assertEquals(expected, parser.parse("{\"key\": [\"apple\", \"orange\", \"cherry\"]}"));
+    }
+
+    @Test
+    void multipleNestedObjects() {
+        var expected = new LinkedHashMap<String, Object>();
+        var key11 = new LinkedHashMap<String, Object>();
+        var key22 = new LinkedHashMap<String, Object>();
+        var key33 = new LinkedHashMap<String, Object>();
+        key33.put("key33", false);
+        key11.put("key11", key33);
+        key22.put("key22", Arrays.asList(1.2, 22.2, 3.33));
+        expected.put("key1", key11);
+        expected.put("key2", key22);
+        expected.put("key3", null);
+        expected.put("key4", "apple");
+        expected.put("key5", 101);
+//        todo: kas vaja muuta actuali
+        assertEquals(expected, parser.parse("""
+                {
+                  "key1": {"key11": {"key33": false}},
+                  "key2": {"key22": [1.2, 22.2, 3.33]},
+                  "key3": null,
+                  "key4": "apple",
+                  "key5": 101
+                }"""));
     }
 
     @Test

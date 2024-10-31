@@ -26,6 +26,7 @@ public class JSONParser {
     public Object parse(Reader input) throws IOException {
         while ((c = (char) input.read()) != '\uFFFF') {
             if (Character.isWhitespace(c)) continue;
+            else if (c == ']') return emptyList();
                 //else if (c == ':' || c == ',') return parse(input);
             else if (c == '{') return readObject(input);
             else if (c == '[') return readArray(input);
@@ -95,16 +96,16 @@ public class JSONParser {
 
     private List<Object> readArray(Reader input) throws IOException {
         var list = new ArrayList<>();
-        //if (c == ']') return emptyList();
         while (c != ']') {
-            list.add(parse(input));
+            var parser = parse(input);
+            if (parser == emptyList()) {
+                break;
+            } else list.add(parser);
+
             if (c == ',') continue;
         }
+        c = (char) input.read();
         return list;
-//        var buf = new char[2];
-//        input.read(buf);
-//        if (new String(buf).equals("[]")) return emptyList();
-
 //        throw new IllegalArgumentException("Unexpected input");
     }
 
@@ -113,6 +114,7 @@ public class JSONParser {
         while (c == ',' || map.isEmpty()) {
             map.put(readString(input), parse(input));
         }
+        c = (char) input.read();
         return map;
 //        return emptyMap();
     }
