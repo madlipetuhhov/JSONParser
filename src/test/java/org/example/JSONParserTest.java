@@ -22,8 +22,8 @@ class JSONParserTest {
 
     @Test
     void string() {
-      assertEquals("hello, Mari & Toomas", parser.parse("\"hello, Mari & Toomas\""));
-      //  assertEquals("jah", parser.parse("\"jah"));
+        assertEquals("hello, Mari & Toomas", parser.parse("\"hello, Mari & Toomas\""));
+        //  assertEquals("jah", parser.parse("\"jah"));
     }
 
     @Test
@@ -145,7 +145,6 @@ class JSONParserTest {
         expected.put("key3", null);
         expected.put("key4", "apple");
         expected.put("key5", 101);
-//        todo: kas vaja muuta actuali
         assertEquals(expected, parser.parse("""
                 {
                   "key1": {"key11": {"key33": false}},

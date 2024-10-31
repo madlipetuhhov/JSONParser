@@ -25,9 +25,7 @@ public class JSONParser {
     public Object parse(Reader input) throws IOException {
         while (nextChar(input) != endOfStringReader()) {
             if (Character.isWhitespace(c)) continue;
-//            todo: edasi emptyListiga
-            else if (c == ']') return emptyList();
-                //else if (c == ':' || c == ',') return parse(input);
+            else if (isEndOfArray()) return emptyList();
             else if (c == '{') return readObject(input);
             else if (c == '[') return readArray(input);
             else if (isQuote()) return readString(input);
@@ -44,7 +42,7 @@ public class JSONParser {
         while (nextChar(input) != endOfStringReader()) {
             if (Character.isWhitespace(c) && string.isEmpty()) continue;
             boolean isFirstQuoteInObjectKey = isQuote() && string.isEmpty();
-            if (isFirstQuoteInObjectKey || c == '\n') continue;
+            if (isFirstQuoteInObjectKey || isNextLine()) continue;
             else {
                 if (isQuote()) {
                     nextChar(input);
@@ -60,7 +58,9 @@ public class JSONParser {
         var string = new StringBuilder();
         string.append(firstNumber);
         while (nextChar(input) != endOfStringReader()) {
-            if (!Character.isDigit(c) && c != '.' && c != '-') break;
+            if (isNextLine()) continue;
+            if (isComma() || isEndOfArray() || isEndOfObject()) break;
+            if (!Character.isDigit(c) && c != '.' && c != '-') throw new IllegalArgumentException("Not number");
             string.append(c);
         }
         if (string.toString().contains(".")) {
@@ -105,7 +105,6 @@ public class JSONParser {
             if (parser == emptyList()) {
                 break;
             } else list.add(parser);
-
             if (isComma()) continue;
         }
         nextChar(input);
@@ -115,11 +114,9 @@ public class JSONParser {
 
     private Map<String, Object> readObject(Reader input) throws IOException {
         var map = new LinkedHashMap<String, Object>();
-
         while (isComma() || map.isEmpty()) {
             map.put(readString(input), parse(input));
         }
-
         nextChar(input);
         return map;
 //        return emptyMap();
@@ -131,6 +128,18 @@ public class JSONParser {
 
     private boolean isComma() {
         return c == ',';
+    }
+
+    private boolean isEndOfArray() {
+        return c == ']';
+    }
+
+    private boolean isEndOfObject() {
+        return c == '}';
+    }
+
+    private boolean isNextLine() {
+        return c == '\n';
     }
 
     private static char endOfStringReader() {
