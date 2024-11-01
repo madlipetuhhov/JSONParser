@@ -54,7 +54,6 @@ management and avoiding memory leaks.
         while (getNextChar(input) != END_OF_INPUT) {
             if (isWhitespace(c)) continue;
             else if (c == END_OF_ARRAY) return emptyList();
-            else if (c == END_OF_OBJECT) return emptyMap();
             else if (c == START_OF_OBJECT) return readObject(input);
             else if (c == START_OF_ARRAY) return readArray(input);
             else if (c == QUOTE) return readString(input);
@@ -135,6 +134,7 @@ management and avoiding memory leaks.
             if (c == END_OF_OBJECT) return emptyMap();
             map.put(readString(input), parse(input));
         }
+//        todo: exception
 //        if (c == END_OF_OBJECT && c == END_OF_INPUT) throw new IllegalArgumentException("Invalid end of object");
         getNextChar(input);
         return map;
