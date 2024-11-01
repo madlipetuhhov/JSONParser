@@ -230,7 +230,7 @@ class JSONParserTest {
     }
     @Test
     void invalidEndOfObjectException() {
-        assertEquals("Unexpected end",
+        assertEquals("Invalid end of object",
                 assertThrows(IllegalArgumentException.class, () ->
                         parser.parse("{\"key\": true")).getMessage());
     }

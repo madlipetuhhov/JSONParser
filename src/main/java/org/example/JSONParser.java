@@ -108,7 +108,7 @@ public class JSONParser {
             } else list.add(parser);
             if (c == COMMA) continue;
         }
-        if (c == END_OF_ARRAY && c == END_OF_INPUT) throw new IllegalArgumentException("Invalid end of array");
+        if (c != END_OF_ARRAY && c == END_OF_INPUT) throw new IllegalArgumentException("Invalid end of array");
         getNextChar(input);
         return list;
     }
@@ -120,8 +120,7 @@ public class JSONParser {
             if (c == END_OF_OBJECT) return emptyMap();
             map.put(readString(input), parse(input));
         }
-//        todo: exception
-//        if (c == END_OF_OBJECT && c == END_OF_INPUT) throw new IllegalArgumentException("Invalid end of object");
+        if (c != END_OF_OBJECT && c == END_OF_INPUT) throw new IllegalArgumentException("Invalid end of object");
         getNextChar(input);
         return map;
     }
