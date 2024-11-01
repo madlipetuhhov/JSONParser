@@ -29,26 +29,12 @@ public class JSONParser {
     private char c;
 
     public Object parse(String input) {
-        try {
-            return parse(new StringReader(input));
+        try (var reader = new StringReader(input)) {
+            return new JSONParser().parse(reader);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
-
-//    todo: close reader
-    /*
-The try-with-resources statement ensures that the StringReader is closed automatically
-after the block is executed, even if an exception occurs. This is important for resource
-management and avoiding memory leaks.
-*/
-//    public static Object parse(String input) {
-//        try (var reader = new StringReader(input)) {
-//            return new JsonParser(reader).parse();
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
 
     public Object parse(Reader input) throws IOException {
         while (getNextChar(input) != END_OF_INPUT) {
