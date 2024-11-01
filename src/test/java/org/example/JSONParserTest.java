@@ -179,67 +179,60 @@ class JSONParserTest {
                 }"""));
     }
 
-//    todo: exception testid ymerkirjutada
     @Test
     void unexpectedCharacterException() {
-        assertThrows(IllegalArgumentException.class,
-                () -> parser.parse("$"),
-                "Unexpected character ");
+        assertEquals("Unexpected character $",
+                assertThrows(IllegalArgumentException.class, () ->
+                        parser.parse("$")).getMessage());
     }
 
     @Test
     void unexpectedEndException() {
-        assertThrows(IllegalArgumentException.class,
-                () -> parser.parse(""),
-                "Unexpected end");
+        assertEquals("Unexpected end",
+                assertThrows(IllegalArgumentException.class, () ->
+                        parser.parse("")).getMessage());
     }
-
     @Test
     void invalidEndOfStringException() {
-        assertThrows(IllegalArgumentException.class,
-                () -> parser.parse("\"jah"),
-                "Invalid end of string");
+        assertEquals("Invalid end of string",
+                assertThrows(IllegalArgumentException.class, () ->
+                        parser.parse("\"jah")).getMessage());
     }
-
     @Test
     void notANumberException() {
-        assertThrows(IllegalArgumentException.class,
-                () -> parser.parse("8$"),
-                "Not a number");
+        assertEquals("Not a number",
+                assertThrows(IllegalArgumentException.class, () ->
+                        parser.parse("8$")).getMessage());
     }
-
     @Test
     void notNullException() {
-        assertThrows(IllegalArgumentException.class,
-                () -> parser.parse("nuul"),
-                "Not a null");
+        assertEquals("Not a null",
+                assertThrows(IllegalArgumentException.class, () ->
+                        parser.parse("nuul")).getMessage());
     }
-
     @Test
     void notTrueException() {
-        assertThrows(IllegalArgumentException.class,
-                () -> parser.parse("rue"),
-                "Not a boolean");
+        assertEquals("Not a boolean",
+                assertThrows(IllegalArgumentException.class, () ->
+                        parser.parse("rue")).getMessage());
     }
-
     @Test
     void notFalseException() {
-        assertThrows(IllegalArgumentException.class,
-                () -> parser.parse("fal"),
-                "Not a boolean");
+        assertEquals("Not a boolean",
+                assertThrows(IllegalArgumentException.class, () ->
+                        parser.parse("fal")).getMessage());
     }
-
     @Test
     void invalidEndOfArrayException() {
-        assertThrows(IllegalArgumentException.class,
-                () -> parser.parse("[1, 22, 3"),
-                "Invalid end of array");
+        assertEquals("Unexpected end",
+                assertThrows(IllegalArgumentException.class, () ->
+                        parser.parse("[1, 22, 3")).getMessage());
     }
-//
-//    @Test
-//    void invalidEndOfObjectException() {
-//        assertThrows(IllegalArgumentException.class,
-//                () -> parser.parse("{\"key\": true"),
-//                "Invalid end of object");
-//    }
+    @Test
+    void invalidEndOfObjectException() {
+        assertEquals("Unexpected end",
+                assertThrows(IllegalArgumentException.class, () ->
+                        parser.parse("{\"key\": true")).getMessage());
+    }
+
 }
