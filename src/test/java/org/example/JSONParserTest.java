@@ -191,15 +191,6 @@ class JSONParserTest {
                 }"""));
     }
 
-//    @Test
-//    public void trailingCommaObject() {
-//        var expected = new LinkedHashMap<String, Object>() {{
-//            put("key", "apple,");
-//        }};
-//        assertEquals(expected, parser.parse("{\"key\": \"orange\",}"));
-//
-//    }
-
     @Test
     public void largeObject() {
         var largeJson = new StringBuilder("{");
@@ -253,12 +244,14 @@ class JSONParserTest {
                 assertThrows(IllegalArgumentException.class, () ->
                         parser.parse("8$")).getMessage());
     }
+
     @Test
     void incorrectDotException() {
         assertEquals("Unexpected character .",
                 assertThrows(IllegalArgumentException.class, () ->
                         parser.parse(".8")).getMessage());
     }
+
     @Test
     void minusIncorrectDotException() {
         assertEquals("Incorrect dot placement",
@@ -301,4 +294,10 @@ class JSONParserTest {
                         parser.parse("{\"key\": true")).getMessage());
     }
 
+    @Test
+    void invalidEndOfObjectTrailingCommaException() {
+        assertEquals("Invalid end of string",
+                assertThrows(IllegalArgumentException.class, () ->
+                        parser.parse("{\"key\": true,}")).getMessage());
+    }
 }

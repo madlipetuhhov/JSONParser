@@ -70,13 +70,14 @@ public class JSONParser extends JSONParserConstants {
             string.append(c);
         }
         int dotIndex = string.indexOf(".");
-        if (dotIndex != 0 && (isDigit(string.toString().charAt(dotIndex-1)))) {
-            return parseDouble(string.toString());
-        } else if (dotIndex == 0 ) {
-            return parseInt(string.toString());
-        } else {
+        if (string.length() > 1 && dotIndex > 0) {
+            if (isDigit(string.toString().charAt(dotIndex - 1)) && isDigit(string.toString().charAt(dotIndex + 1))) {
+                return parseDouble(string.toString());
+            }
             throw new IllegalArgumentException("Incorrect dot placement");
-        }
+        } else if (dotIndex == -1) {
+            return parseInt(string.toString());
+        } else throw new IllegalArgumentException("Incorrect dot placement");
     }
 
     private Object readNull(Reader input) throws IOException {
@@ -112,7 +113,8 @@ public class JSONParser extends JSONParserConstants {
         var map = new LinkedHashMap<String, Object>();
         while (c == COMMA || map.isEmpty()) {
             getNextChar(input);
-            if (c == END_OF_OBJECT) return emptyMap();
+            if (c == END_OF_OBJECT && map.isEmpty()) return emptyMap();
+            // if (c == END_OF_OBJECT) throw new IllegalArgumentException("Invalid end of object");
             map.put(readString(input), parse(input));
         }
         if (c != END_OF_OBJECT && c == END_OF_INPUT) throw new IllegalArgumentException("Invalid end of object");
