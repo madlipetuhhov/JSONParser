@@ -15,17 +15,7 @@ import static java.lang.Double.parseDouble;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 
-public class JSONParser {
-    public static final char END_OF_OBJECT = '}';
-    private static final char END_OF_INPUT = Character.MAX_VALUE;
-    public static final char NEXT_LINE = '\n';
-    public static final char END_OF_ARRAY = ']';
-    public static final char COMMA = ',';
-    public static final char QUOTE = '"';
-    public static final char START_OF_OBJECT = '{';
-    public static final char START_OF_ARRAY = '[';
-    public static final char MINUS = '-';
-    public static final char DOT = '.';
+public class JSONParser extends JSONParserConstants {
     private char c;
 
     public Object parse(String input) {

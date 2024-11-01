@@ -1,10 +1,10 @@
 package org.example;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.emptyList;
@@ -46,7 +46,6 @@ class JSONParserTest {
         assertEquals(false, parser.parse("false"));
     }
 
-    // todo: ] jouab parse meetodisse ja unexpected character
     @Test
     void emptyArray() {
         assertEquals(emptyList(), parser.parse("[]"));
@@ -125,37 +124,36 @@ class JSONParserTest {
 
     @Test
     void multipleNestedObjects() {
-//        todo: kui jouab, teha map.of()
-        var expected = new LinkedHashMap<String, Object>();
-        var key11 = new LinkedHashMap<String, Object>();
-        var key22 = new LinkedHashMap<String, Object>();
-        var key33 = new LinkedHashMap<String, Object>();
-        key33.put("key33", false);
-        key11.put("key11", key33);
-        key22.put("key22", Arrays.asList(1.2, 22.2, 3.33));
-        expected.put("key1", key11);
-        expected.put("key2", key22);
-        expected.put("key3", null);
-        expected.put("key4", "apple");
-        expected.put("key5", 101);
+        var expected = Map.of(
+                "key1", Map.of(
+                        "key11", Map.of(
+                                "key33", false
+                        )
+                ),
+                "key2", Map.of(
+                        "key22", List.of(1.2, 22.2, 3.33)
+                ),
+                "key3", true,
+                "key4", "apple pie",
+                "key5", 101
+        );
+
         assertEquals(expected, parser.parse(/* language=json */ """
                 {
                   "key1": {"key11": {"key33": false}},
                   "key2": {"key22": [1.2, 22.2, 3.33]},
-                  "key3": null,
-                  "key4": "apple",
+                  "key3": true,
+                  "key4": "apple pie",
                   "key5": 101
                 }"""));
     }
 
     @Test
     void oneLineMultipleNestedObjects() {
-        var expected = new LinkedHashMap<String, Object>();
-        var key2 = new LinkedHashMap<String, Object>();
-        var key3 = new LinkedHashMap<String, Object>();
-        expected.put("key1", key2);
-        key2.put("key2", key3);
-        key3.put("key3", false);
+        var expected = Map.of(
+                "key1", Map.of(
+                        "key2", Map.of(
+                                "key3", false)));
         assertEquals(expected, parser.parse(/* language=json */ """
                 {"key1": {"key2": {"key3": false}}}"""));
     }
@@ -192,47 +190,53 @@ class JSONParserTest {
                 assertThrows(IllegalArgumentException.class, () ->
                         parser.parse("")).getMessage());
     }
+
     @Test
     void invalidEndOfStringException() {
         assertEquals("Invalid end of string",
                 assertThrows(IllegalArgumentException.class, () ->
                         parser.parse("\"jah")).getMessage());
     }
+
     @Test
     void notANumberException() {
         assertEquals("Not a number",
                 assertThrows(IllegalArgumentException.class, () ->
                         parser.parse("8$")).getMessage());
     }
+
     @Test
     void notNullException() {
         assertEquals("Not a null",
                 assertThrows(IllegalArgumentException.class, () ->
                         parser.parse("nuul")).getMessage());
     }
+
     @Test
     void notTrueException() {
         assertEquals("Not a boolean",
                 assertThrows(IllegalArgumentException.class, () ->
                         parser.parse("rue")).getMessage());
     }
+
     @Test
     void notFalseException() {
         assertEquals("Not a boolean",
                 assertThrows(IllegalArgumentException.class, () ->
                         parser.parse("fal")).getMessage());
     }
+
     @Test
     void invalidEndOfArrayException() {
         assertEquals("Unexpected end",
                 assertThrows(IllegalArgumentException.class, () ->
                         parser.parse("[1, 22, 3")).getMessage());
     }
+
     @Test
     void invalidEndOfObjectException() {
         assertEquals("Invalid end of object",
                 assertThrows(IllegalArgumentException.class, () ->
                         parser.parse("{\"key\": true")).getMessage());
     }
-
 }
