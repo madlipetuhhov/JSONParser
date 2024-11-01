@@ -11,7 +11,9 @@ import java.util.Map;
 
 import static java.lang.Character.isDigit;
 import static java.lang.Character.isWhitespace;
+import static java.lang.Character.isAlphabetic;
 import static java.lang.Double.parseDouble;
+import static java.lang.Integer.parseInt;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 
@@ -35,7 +37,7 @@ public class JSONParser extends JSONParserConstants {
             else if (c == QUOTE) return readString(input);
             else if (isDigit(c) || c == MINUS) return readNumber(input, c);
             else if (c == 'n') return readNull(input);
-            else if (Character.isAlphabetic(c)) return readBoolean(input, c);
+            else if (isAlphabetic(c)) return readBoolean(input, c);
             else throw new IllegalArgumentException("Unexpected character " + c);
         }
         throw new IllegalArgumentException("Unexpected end");
@@ -67,10 +69,13 @@ public class JSONParser extends JSONParserConstants {
             if (!isDigit(c) && c != DOT && c != MINUS) throw new IllegalArgumentException("Not a number");
             string.append(c);
         }
-        if (string.toString().contains(".")) {
+        int dotIndex = string.indexOf(".");
+        if (dotIndex != 0 && (isDigit(string.toString().charAt(dotIndex-1)))) {
             return parseDouble(string.toString());
+        } else if (dotIndex == 0 ) {
+            return parseInt(string.toString());
         } else {
-            return Integer.parseInt(string.toString());
+            throw new IllegalArgumentException("Incorrect dot placement");
         }
     }
 

@@ -82,44 +82,58 @@ class JSONParserTest {
 
     @Test
     void stringObject() {
-        var expected = new LinkedHashMap<String, Object>();
-        expected.put("key", "value");
+        var expected = new LinkedHashMap<String, Object>() {{
+            put("key", "value");
+        }};
         assertEquals(expected, parser.parse("{\"key\": \"value\"}"));
     }
 
     @Test
     void integerObject() {
-        var expected = new LinkedHashMap<String, Object>();
-        expected.put("key", 8);
+        var expected = new LinkedHashMap<String, Object>() {{
+            put("key", 8);
+        }};
         assertEquals(expected, parser.parse("{\"key\": 8}"));
     }
 
     @Test
     void nullObject() {
-        var expected = new LinkedHashMap<String, Object>();
-        expected.put("key", null);
+        var expected = new LinkedHashMap<String, Object>() {{
+            put("key", null);
+        }};
         assertEquals(expected, parser.parse("{\"key\": null}"));
     }
 
     @Test
     void doubleObject() {
-        var expected = new LinkedHashMap<String, Object>();
-        expected.put("key", 8.8);
+        var expected = new LinkedHashMap<String, Object>() {{
+            put("key", 8.8);
+        }};
         assertEquals(expected, parser.parse("{\"key\": 8.8}"));
     }
 
     @Test
     void booleanObject() {
-        var expected = new LinkedHashMap<String, Object>();
-        expected.put("key", true);
+        var expected = new LinkedHashMap<String, Object>() {{
+            put("key", true);
+        }};
         assertEquals(expected, parser.parse("{\"key\": true}"));
     }
 
     @Test
     void arrayObject() {
-        var expected = new LinkedHashMap<String, Object>();
-        expected.put("key", Arrays.asList("apple", "orange", "cherry"));
+        var expected = new LinkedHashMap<String, Object>() {{
+            put("key", Arrays.asList("apple", "orange", "cherry"));
+        }};
         assertEquals(expected, parser.parse("{\"key\": [\"apple\", \"orange\", \"cherry\"]}"));
+    }
+
+    @Test
+    public void mixedArrayObject() {
+        var expected = new LinkedHashMap<String, Object>() {{
+            put("key", Arrays.asList(12, "orange", null, true, 1.2));
+        }};
+        assertEquals(expected, parser.parse("{\"key\": [12, \"orange\", null, true, 1.2]}"));
     }
 
     @Test
@@ -127,7 +141,7 @@ class JSONParserTest {
         var expected = Map.of(
                 "key1", Map.of(
                         "key11", Map.of(
-                                "key33", false
+                                "key33", Map.of("key44", false)
                         )
                 ),
                 "key2", Map.of(
@@ -140,7 +154,7 @@ class JSONParserTest {
 
         assertEquals(expected, parser.parse(/* language=json */ """
                 {
-                  "key1": {"key11": {"key33": false}},
+                  "key1": {"key11": {"key33": {"key44":  false}}},
                   "key2": {"key22": [1.2, 22.2, 3.33]},
                   "key3": true,
                   "key4": "apple pie",
@@ -177,6 +191,41 @@ class JSONParserTest {
                 }"""));
     }
 
+//    @Test
+//    public void trailingCommaObject() {
+//        var expected = new LinkedHashMap<String, Object>() {{
+//            put("key", "apple,");
+//        }};
+//        assertEquals(expected, parser.parse("{\"key\": \"orange\",}"));
+//
+//    }
+
+    @Test
+    public void largeObject() {
+        var largeJson = new StringBuilder("{");
+        for (int i = 0; i < 10000; i++) {
+            largeJson.append("\"key").append(i).append("\": ").append(i).append(", ");
+        }
+        largeJson.delete(largeJson.length() - 2, largeJson.length());
+        largeJson.append("}");
+
+        var expected = new LinkedHashMap<>() {{
+            for (int i = 0; i < 10000; i++) {
+                put("key" + i, i);
+            }
+        }};
+        assertEquals(expected, parser.parse(largeJson.toString()));
+    }
+
+    @Test
+    public void nestedEmptyObjects() {
+        var expected = Map.of(
+                "key1", Map.of(
+                        "key2", Map.of()));
+        assertEquals(expected, parser.parse(/* language=json */ """
+                {"key1": {"key2": {}}}"""));
+    }
+
     @Test
     void unexpectedCharacterException() {
         assertEquals("Unexpected character $",
@@ -203,6 +252,18 @@ class JSONParserTest {
         assertEquals("Not a number",
                 assertThrows(IllegalArgumentException.class, () ->
                         parser.parse("8$")).getMessage());
+    }
+    @Test
+    void incorrectDotException() {
+        assertEquals("Unexpected character .",
+                assertThrows(IllegalArgumentException.class, () ->
+                        parser.parse(".8")).getMessage());
+    }
+    @Test
+    void minusIncorrectDotException() {
+        assertEquals("Incorrect dot placement",
+                assertThrows(IllegalArgumentException.class, () ->
+                        parser.parse("-.8")).getMessage());
     }
 
     @Test
@@ -239,4 +300,5 @@ class JSONParserTest {
                 assertThrows(IllegalArgumentException.class, () ->
                         parser.parse("{\"key\": true")).getMessage());
     }
+
 }
